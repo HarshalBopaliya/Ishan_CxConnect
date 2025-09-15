@@ -1,6 +1,6 @@
-const app = require("./app.ts");
-const connectDB = require("./config/dbConnect.ts");
-const dotenv = require("dotenv");
+import connectDB from "./config/dbConnect.js";
+import app from "./app.js";
+import dotenv from "dotenv";
 
 dotenv.config({ path: ".config" });
 

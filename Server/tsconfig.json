@@ -7,8 +7,8 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    // "module": "nodenext",
-    // "target": "esnext",
+    "module": "nodenext",
+    "target": "esnext",
 
     // For nodejs:
     // "lib": ["esnext"],
@@ -33,21 +33,20 @@
     // "noPropertyAccessFromIndexSignature": true,
 
     // Recommended Options
-    "strict": true,
     "jsx": "react-jsx",
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
+    "moduleResolution": "nodenext", // Resolve like Node.js
+    "esModuleInterop": true, // Allow CommonJS interop
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
     "skipLibCheck": true,
-
-    "types": ["node"], // Add this line to include Node.js types
-    "esModuleInterop": true, // Add this line to enable ES module interoperability
-
-    "target": "ES2020",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
-    "outDir": "./dist",
-    "rootDir": "./src"
-  }
+    "outDir": "dist", // Compiled JS output
+    "rootDir": "src", // Source folder
+    "types": ["node", "express"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }
