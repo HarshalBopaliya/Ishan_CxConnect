@@ -1,40 +1,42 @@
-import React from "react";
-import {
-  type ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { useState, useEffect } from "react";
+import {type ColumnDef,flexRender,getCoreRowModel,getPaginationRowModel,getSortedRowModel,useReactTable,type RowSelectionState,} from "@tanstack/react-table";
+import Checkbox from "../components/ui/checkbox";
+// import {fetchUsers} from "../services/users.ts";
 
-interface DataTableProps<T> {
-  columns: ColumnDef<T>[];
-  data: T[];
-  pageSize?: number;
-  enableSorting?: boolean;
-  enablePagination?: boolean;
+interface DataTableProps<Table> {
+  columns: ColumnDef<Table>[];
+  data: Table[];
+  sorting: { enable: boolean };
+  pagination: { recordsToShow: number[];
+    enable: boolean;
+    textToShow?: (to: string, from: string, total: number)=>void,
+  };
+  refetch: () => void;
   enableSelection?: boolean;
 }
 
-function DataTable<T>({
+function DataTable<Table>({
   columns,
   data,
-  pageSize = 5,
-  enableSorting = true,
-  enablePagination = true,
-  enableSelection = false,
-}: DataTableProps<T>) {
-  const [rowSelection, setRowSelection] = React.useState({});
-  const [pagination, setPagination] = React.useState({
+  sorting,
+  pagination,
+  enableSelection = true,
+}: DataTableProps<Table>) {
+ 
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
-    pageSize: pageSize,
+    pageSize: pagination.recordsToShow[1] || 10,
   });
 
-  // keep pageSize in sync with prop changes
-  React.useEffect(() => {
-    setPagination(prev => ({ ...prev, pageSize }));
-  }, [pageSize]);
+
+  useEffect(() => {
+    if (pagination.textToShow && pagination.enable) {
+      const start = paginationState.pageIndex * paginationState.pageSize + 1;
+      const end = Math.min((paginationState.pageIndex + 1) * paginationState.pageSize, data.length);
+      pagination.textToShow(end.toString(), start.toString(), data.length);
+    }
+  }, [paginationState, data.length, pagination]);
 
   const table = useReactTable({
     data,
@@ -43,15 +45,13 @@ function DataTable<T>({
           {
             id: "select",
             header: ({ table }) => (
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={table.getIsAllPageRowsSelected()}
-                onChange={table.getToggleAllPageRowsSelectedHandler()}
+                onChange={(checked) => table.toggleAllPageRowsSelected(checked)}  
               />
             ),
             cell: ({ row }) => (
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={row.getIsSelected()}
                 onChange={row.getToggleSelectedHandler()}
               />
@@ -60,55 +60,75 @@ function DataTable<T>({
           ...columns,
         ]
       : columns,
-    state: { rowSelection, pagination },
+    state: { rowSelection, pagination: paginationState },
     onRowSelectionChange: setRowSelection,
-    onPaginationChange: setPagination,
+    onPaginationChange: setPaginationState,
     getCoreRowModel: getCoreRowModel(),
-    ...(enableSorting && { getSortedRowModel: getSortedRowModel() }),
-    ...(enablePagination && { getPaginationRowModel: getPaginationRowModel() }),
+    ...(sorting.enable && { getSortedRowModel: getSortedRowModel() }),
+    ...(pagination.enable && { getPaginationRowModel: getPaginationRowModel() }),
   });
+
 
   return (
     <div>
+       <div className="flex items-center gap-2">
+            <label>Show</label>
+            <select
+              value={paginationState.pageSize}
+              onChange={(e) =>
+                setPaginationState({ ...paginationState, pageSize: Number(e.target.value), pageIndex: 0 })
+              }
+              className="border rounded px-2 py-1"
+            >
+              {pagination.recordsToShow.map((size) => (
+                <option key={size} value={size}>
+                  {  size  }
+                </option>
+              ))}
+            </select>
+            <label>entries</label>
+          </div>
+          <br/>
       <table className="min-w-full border">
         <thead className="bg-gray-100">
-          {table.getHeaderGroups().map(headerGroup => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
+          {table.getHeaderGroups().map((group) => (
+            <tr key={group.id}>
+              {group.headers.map((header) => (
                 <th
                   key={header.id}
                   className={`border px-3 py-2 text-left ${
-                    enableSorting ? "cursor-pointer" : ""
+                    sorting.enable && header.column.getCanSort() ? "cursor-pointer hover:bg-gray-200" : ""
                   }`}
                   onClick={
-                    enableSorting
-                      ? e => {
-                          if (
-                            (e.target as HTMLElement).closest(
-                              "input,button,label"
-                            )
-                          )
-                            return;
-                          header.column.getToggleSortingHandler()?.(e);
-                        }
+                    sorting.enable && header.column.getCanSort()
+                      ? header.column.getToggleSortingHandler()
                       : undefined
                   }
                 >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                  <div className="flex items-center gap-2">
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                    {sorting.enable && header.column.getCanSort() && (
+                      <span className="text-gray-400 text-xs">
+                        {header.column.getIsSorted() === "desc"
+                          ? "↓"
+                          : header.column.getIsSorted() === "asc"
+                          ? "↑"
+                          : "↕"}
+                      </span>
+                    )}
+                  </div>
                 </th>
               ))}
             </tr>
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map(row => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map(cell => (
+          {table.getRowModel().rows.map((row) => (
+            <tr
+              key={row.id}
+              className={`${row.getIsSelected() ? "bg-blue-50" : ""} hover:bg-gray-50`}
+            >
+              {row.getVisibleCells().map((cell) => (
                 <td key={cell.id} className="border px-3 py-2">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
@@ -118,25 +138,37 @@ function DataTable<T>({
         </tbody>
       </table>
 
-      {enablePagination && (
-        <div className="flex justify-between mt-3">
-          <button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="px-2 py-1 border rounded"
-          >
-            Prev
-          </button>
-          <span>
-            Page {pagination.pageIndex + 1} of {table.getPageCount()}
-          </span>
-          <button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="px-2 py-1 border rounded"
-          >
-            Next
-          </button>
+      {pagination.enable && (
+        <div className="flex items-center justify-between mt-4 text-sm">
+          <div>
+            Showing {paginationState.pageIndex * paginationState.pageSize + 1} to{" "}
+            {Math.min((paginationState.pageIndex + 1) * paginationState.pageSize, data.length)} of{" "}
+            {data.length} entries
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+
+            <span>
+              Page {paginationState.pageIndex + 1} of {table.getPageCount()}
+            </span>
+
+            <button
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+
+         
         </div>
       )}
     </div>

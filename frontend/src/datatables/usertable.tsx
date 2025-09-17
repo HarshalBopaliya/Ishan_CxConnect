@@ -4,25 +4,25 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { User } from "../../types/user-table";
 import { DummyData } from "../../stores/dummydata";
 
+
 export default function UserTable() {
   const [data, setData] = useState<User[]>(DummyData);
-  const [pageSize, setPageSize] = useState<number>(5);
 
   const handleStatusChange = (id: number, value: string) => {
     setData(prev =>
       prev.map(user =>
         user.UserId === id
-          ? { ...user, Status: { currentStatus: value } }
+          ? { ...user, Status: value }
           : user
       )
     );
   };
 
-  const handleRoleChange = (id: number, value: string) => {
+  const handleUserLevelChange = (id: number, value: string) => {
     setData(prev =>
       prev.map(user =>
         user.UserId === id
-          ? { ...user, UserLevel: { role: value } }
+          ? { ...user, UserLevel: value }
           : user
       )
     );
@@ -35,7 +35,7 @@ export default function UserTable() {
       header: "Status",
       cell: ({ row }) => (
         <select
-          value={row.original.Status.currentStatus}
+          value={row.original.Status}
           onChange={e => handleStatusChange(row.original.UserId, e.target.value)}
           className="border rounded px-1 py-0.5"
         >
@@ -45,11 +45,11 @@ export default function UserTable() {
       ),
     },
     {
-      header: "Role",
+      header: "User Level",
       cell: ({ row }) => (
         <select
-          value={row.original.UserLevel.role}
-          onChange={e => handleRoleChange(row.original.UserId, e.target.value)}
+          value={row.original.UserLevel}
+          onChange={e => handleUserLevelChange(row.original.UserId, e.target.value)}
           className="border rounded px-1 py-0.5"
         >
           <option value="admin">admin</option>
@@ -62,33 +62,30 @@ export default function UserTable() {
     { header: "Group", accessorKey: "Group" },
   ];
 
+  //refetch callback function..
+  const refetch = () => {
+    console.log("this function is used to fetch the sorting,pagination,searching");
+  };
+
+  const handlePaginationText = (to: string, from: string, total: number) => {
+    console.log(`Showing ${from} to ${to} of ${total} entries`);
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <label htmlFor="entries" className="font-medium">
-          Show&nbsp;
-        </label>
-        <select
-          id="entries"
-          value={pageSize}
-          onChange={e => setPageSize(Number(e.target.value))}
-          className="border rounded px-2 py-1"
-        >
-          {[2, 5, 10, 25, 50].map(size => (
-            <option key={size} value={size}>
-              {size}
-            </option>
-          ))}
-        </select>
-        <span>&nbsp;entries</span>
       </div>
 
       <DataTable
         columns={userColumns}
         data={data}
-        pageSize={pageSize}
-        enableSorting
-        enablePagination
+        sorting={{enable: true}}
+        pagination={{
+          recordsToShow: [2, 5, 10, 25, 50],
+          enable: true,
+          textToShow: handlePaginationText
+        }}
+        refetch={refetch}
       />
     </div>
   );
