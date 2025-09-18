@@ -1,28 +1,68 @@
-import { useState } from 'react'
+import { Navigate, Route, Routes } from "react-router-dom";
+import Layout from "./components/Layout";
+import { routes } from "./routers/routes";
+import { ROUTES } from "./routers";
+import TitleUpdater from "./components/TitleUpdater";
+import Login from "./components/Login";
+import type React from "react";
 
-import './App.css'
+const App = () => {
+  const isLoggedIn: boolean = true;
 
+  const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+    return isLoggedIn ? children : <Navigate to={routes.login} replace />;
+  };
 
-function App() {
-  const [count, setCount] = useState(0)
-  
+  const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+    return !isLoggedIn ? children : <Navigate to="/" replace />;
+  };
 
   return (
     <>
-      <h1>Ishan Cxconnect</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <TitleUpdater routes={ROUTES} />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <PrivateRoute>
+              <Layout />
+            </PrivateRoute>
+          }
+        >
+          {ROUTES.map((route) => {
+            // console.log("route", route);
+            return (
+              <Route
+                key={route.id}
+                path={route.path}
+                element={route.children ? null : <route.element />}
+              >
+                {route.children?.map((child) => {
+                  // console.log("child", child);
+                  return (
+                    <Route
+                      key={child.id}
+                      path={child.path}
+                      element={<child.element />}
+                    />
+                  );
+                })}
+              </Route>
+            );
+          })}
+        </Route>
+        <Route
+          path={routes.login}
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route path="*" element={<h1>Page not found</h1>} />
+      </Routes>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;
