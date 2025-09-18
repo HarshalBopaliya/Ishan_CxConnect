@@ -1,9 +1,9 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import Layout from "./components/Layout";
-import { routes } from "./routers/routes";
-import { ROUTES } from "./routers";
-import TitleUpdater from "./components/TitleUpdater";
-import Login from "./components/Login";
+import Main from "./shared/layouts/Main";
+import { routes } from "./routes/routes";
+import { ROUTES } from "./routes";
+import TitleUpdater from "./shared/components/TitleUpdater";
+import Login from "./shared/components/Login";
 import type React from "react";
 
 const App = () => {
@@ -25,25 +25,29 @@ const App = () => {
           path="/"
           element={
             <PrivateRoute>
-              <Layout />
+              <Main />
             </PrivateRoute>
           }
         >
           {ROUTES.map((route) => {
             // console.log("route", route);
+
+            const Element = route.element;
+
             return (
               <Route
                 key={route.id}
                 path={route.path}
-                element={route.children ? null : <route.element />}
+                element={route.children ? null : <Element />}
               >
                 {route.children?.map((child) => {
                   // console.log("child", child);
+                  const ChildElement = child.element;
                   return (
                     <Route
                       key={child.id}
                       path={child.path}
-                      element={<child.element />}
+                      element={<ChildElement />}
                     />
                   );
                 })}

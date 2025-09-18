@@ -1,12 +1,12 @@
 import React from "react";
-import Sidebar from "./Sidebar";
+import SidebarComp from "../components/sidebar";
 import { Outlet } from "react-router-dom";
 
-const Layout: React.FC = () => {
+const Main: React.FC = () => {
   return (
     <div className="flex h-screen">
       {/* Sidebar (fixed width) */}
-      <Sidebar />
+      <SidebarComp />
 
       {/* Main content (takes remaining space) */}
       <main className="flex-1 bg-gray-100 overflow-y-auto p-4">
@@ -17,4 +17,4 @@ const Layout: React.FC = () => {
   );
 };
 
-export default Layout;
+export default Main;

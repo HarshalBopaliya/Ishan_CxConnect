@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { SideBarItems } from "../utils";
+import { SideBarItems } from "./sidebar";
 import { NavLink } from "react-router-dom";
 import { ChevronUp, ChevronDown, Dot } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
-const Sidebar: React.FC = () => {
+const SidebarComp: React.FC = () => {
   const location = useLocation();
 
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
@@ -102,4 +102,4 @@ const Sidebar: React.FC = () => {
   );
 };
 
-export default Sidebar;
+export default SidebarComp;
