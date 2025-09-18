@@ -3,7 +3,7 @@ import DataTable from "../../components/tables";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { User } from "../../types/user-table";
 import { DummyData } from "../../stores/dummydata";
-
+import "../../components/ui/checkbox";
 
 export default function UserTable() {
   const [data, setData] = useState<User[]>(DummyData);
@@ -62,10 +62,9 @@ export default function UserTable() {
     { header: "Group", accessorKey: "Group" },
   ];
 
-  //refetch callback function..
-  const refetch = () => {
-    console.log("this function is used to fetch the sorting,pagination,searching");
-  };
+ const refetch=()=>{
+  console.log("refetch data");
+ }
 
   const handlePaginationText = (to: string, from: string, total: number) => {
     console.log(`Showing ${from} to ${to} of ${total} entries`);
