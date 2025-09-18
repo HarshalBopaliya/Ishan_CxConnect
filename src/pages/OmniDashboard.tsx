@@ -1,7 +1,7 @@
 import React from "react";
 
 const OmniDashboard: React.FC = () => {
-  return <div>OmniDashboard</div>;
+  return <div>Omni Dashboard</div>;
 };
 
 export default OmniDashboard;

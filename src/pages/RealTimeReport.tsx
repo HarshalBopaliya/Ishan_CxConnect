@@ -1,7 +1,7 @@
 import React from "react";
 
 const RealTimeReport: React.FC = () => {
-  return <div>RealTimeReport</div>;
+  return <div>RealTime Report</div>;
 };
 
 export default RealTimeReport;

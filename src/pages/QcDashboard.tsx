@@ -1,7 +1,7 @@
 import React from "react";
 
 const QcDashboard: React.FC = () => {
-  return <div>QcDashboard</div>;
+  return <div>QC Dashboard</div>;
 };
 
 export default QcDashboard;
