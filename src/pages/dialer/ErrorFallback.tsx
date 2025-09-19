@@ -1,9 +1,7 @@
-const ErrorFallback = () => {
-  return (
-    <div>
-      <h4>Something went wrong here....</h4>
-    </div>
-  );
+import React from "react";
+
+const ErrorFallback: React.FC = () => {
+  return <div>Something went wrong. Please try again.</div>;
 };
 
 export default ErrorFallback;

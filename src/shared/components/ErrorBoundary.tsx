@@ -1,10 +1,16 @@
 import React, { Component } from "react";
 
-export class ErrorBoundary extends Component<
-  { fallback: React.ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: any) {
+type Props = {
+  fallback: React.ReactNode;
+  children: React.ReactNode;
+};
+
+type State = {
+  hasError: boolean;
+};
+
+export class ErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = { hasError: false };
   }
@@ -13,7 +19,7 @@ export class ErrorBoundary extends Component<
     return { hasError: true };
   }
 
-  componentDidCatch(error: any, info: any) {
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error("Caught by ErrorBoundary:", error, info);
   }
 
